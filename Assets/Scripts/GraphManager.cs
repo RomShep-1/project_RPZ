@@ -12,6 +12,7 @@ public class GraphManager : MonoBehaviour
     private List<int> indexHeight = new List<int>();
     private List<int> indexWidht = new List<int>();
     private List<GameObject> createdVertexGraph = new List<GameObject>();
+    private CircleCollider2D vertexCollider;
     private float widthVertexGraph;
     private bool createVertexConnections;
     private bool checkIntersectionVertex;
@@ -19,7 +20,8 @@ public class GraphManager : MonoBehaviour
     private int counterIndex;
     void Start()
     {
-        adjacencyMatrix = new int[,] { { 0, 1, 1, 1 }, { 1, 0, 1, 1 }, { 1, 1, 0, 1 }, { 1, 1, 1, 0 } };
+        vertexCollider = prefVertexGraph.GetComponent<CircleCollider2D>();
+        adjacencyMatrix = ReadingData.adjacencyMatrix;
         quantityVertex = (int)Mathf.Sqrt((float)adjacencyMatrix.Length);
         widthVertexGraph = prefVertexGraph.GetComponent<RectTransform>().rect.width;
 
@@ -73,15 +75,20 @@ public class GraphManager : MonoBehaviour
                     edgeGraph.transform.SetParent(transform);
                     edgeGraph.transform.localScale = new Vector3(1, 1, 1);
                     LineRenderer lineGraph = edgeGraph.GetComponent<LineRenderer>();
-                    lineGraph.SetPosition(0, createdVertexGraph[i].transform.localPosition);
-                    lineGraph.SetPosition(1, createdVertexGraph[j].transform.localPosition);
-                }
-                else
-                {
 
+                    Vector3 biasLine = vertexCollider.radius * Vector3.Normalize(createdVertexGraph[i].transform.localPosition - createdVertexGraph[j].transform.localPosition);
+                    lineGraph.SetPosition(0, createdVertexGraph[i].transform.localPosition - biasLine);
+                    lineGraph.SetPosition(1, createdVertexGraph[j].transform.localPosition + biasLine);
                 }
             }
         }
+        VertexSignature();
+    }
+
+    private void VertexSignature()
+    {
+        for(int i = 0; i < createdVertexGraph.Count; i++)
+            createdVertexGraph[i].GetComponentInChildren<Text>().text = SizeMatrix.inpFieldSubjectsY[i].text;
     }
 
     private bool CheckingIntersectionVertex(int i, int j)
